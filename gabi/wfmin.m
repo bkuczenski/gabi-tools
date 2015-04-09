@@ -85,3 +85,21 @@ else
 end  
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% I thought I got rid of this...
+function [minval,maxconsval,maxattval] = maxmin(input)
+
+sums=cumsum(input,2);
+
+input(find(input<0))=deal(0);
+attmax=sum(input,2)';
+
+minval=min([min(sums),0]);
+maxconsval=max([max(sums),0]);
+try
+  maxattval=max([attmax,0]);
+catch
+  keyboard
+end
+
