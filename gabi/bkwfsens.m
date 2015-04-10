@@ -1,7 +1,11 @@
-function bkwfsens(wfstruct,cat,mycolor)
+function bkwfsens(wfstruct,cat,mycolor,stages)
 % multiple clusters is not supported
 
 my_cat=wfstruct(1).category(cat);
+
+if nargin<4
+    stages=my_cat.stages;
+end
 
 errorbar_1=[wfstruct(2).category(cat).data{:}]-[my_cat.data{:}];
 errorbar_2=[wfstruct(3).category(cat).data{:}]-[my_cat.data{:}];
@@ -12,7 +16,7 @@ if ~iscell(my_cat.data)
   error('must be cell!')
 end
 
-numstages=length([my_cat.data{:}]);
+numstages=length(stages);
 set(gcf,'Position',get(gcf,'Position')+[0 0 0 0.145*numstages])
 maxy=labelcutoff*my_cat.maxy;
 
@@ -45,10 +49,10 @@ if noyaxis=='y'
 end
 % plot the figure
 offs=0;
-offs=drawbars(my_cat.data{1},mycolor,buffer,fmean,maxy,offs,errorbar_1,errorbar_2);
+offs=drawbars(my_cat.data{1}(1:numstages),mycolor,buffer,fmean,maxy,offs,errorbar_1,errorbar_2);
 
 set(gca,'YTick',[1:numstages+1]);
-set(gca,'YTickLabel',[my_cat.stages{:} 'Total Sens'],'FontSize',mainfontsize);
+set(gca,'YTickLabel',[stages 'Total Sens'],'FontSize',mainfontsize);
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
 
 %         attributional total vline

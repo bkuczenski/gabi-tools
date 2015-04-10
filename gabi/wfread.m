@@ -1,7 +1,6 @@
-function S=wfread(G,use,opt)
-% function S=wfread(G)
-% creates a scenario data structure from a GaBi category structure according to
-% arguments or chartconfig.  G should come from Gcats.
+function S=wfread(G,groups,use)
+% function S=wfread(G) creates a scenario data structure from a GaBi category
+% structure.  G should come from Gcats.
 %
 % Generates a structure array with the following fields:
 % (first entry only):
@@ -22,9 +21,22 @@ function S=wfread(G,use,opt)
 %    S(i).category(j).data=dat;
 %    S(i).category(j).stages=stg;
 %   
+% By default, all first-level stages are reported, with sub-stages ignored.
 %
-% function S=wfread(G,use)
-% specify which cases to use.  cases are unique first-row header entries.
+% function S=wfread(G,stages) where stages is a cell array of stage names or
+% subgroup names or cell arrays of stage names or subgroup names, will group
+% together all records that match any elements of each subarray.  
+%
+% In order to avoid double counting, as soon as a record is matched, all records
+% matching that record with ONE-LEVEL of LESSER specificity are removed (these
+% represent total rows). Also all records with GREATER specificity are removed.
+%
+% At the end, nonzero values that have not been matched are grouped together in a
+% catch all container.
+%
+% function S=wfread(G,stages,cases)
+% specify which cases to use.  cases are unique first-row header entries. By
+% default, all cases are used.
 %
 % note: this function is still wonky.  note that quantity-view pastes are
 % different from flow-view pastes in that the former do not have total rows. 
@@ -42,25 +54,10 @@ function S=wfread(G,use,opt)
 % non-header row).  In the cell array case, the rows in each vector are added
 % together.  If the [autodetected] units for added rows don't match, throws an error!
 %
-% The column structure is configured in chartconfig.
-%
-% function S=wfread(G,use,opt)
-% with a third argument, configure output in an ad hoc fashion.
-% opt=
-%      absent or 0: in_stages default with management hack
-%      1: improper: read all into stacked data, 3-bar condensed mgmt
-%      1.5: improper: read all into stacked data, 1-bar conseq total mgmt
-%      2: DIM: all 3 conseq net totals stacked
-%
-% can be all done in post
 
 cases=unique(G.H(1,cellfun(@isstr,G.H(1,:))));
 
-if nargin<3
-  opt=0;
-end
-
-if nargin<2 | isempty(use)
+if nargin<3 | isempty(use)
   use=cases;
 else
   use=intersect(use,cases);
@@ -73,6 +70,21 @@ end
 [~,I]=sort(firstind);
 use=use(I);
 
+stages=unique(G.H(2,cellfun(@isstr,G.H(2,:))));
+
+% sort stages by the order they appear in H
+for i=1:length(stages)
+  firstind(i)=min(find(strcmp(G.H(2,cellfun(@isstr,G.H(2,:))),stages{i})));
+end
+[~,I]=sort(firstind);
+stages=stages(I);
+
+if nargin<2 | isempty(groups)
+  groups=stages;
+end
+
+
+
 fprintf('Selecting cases:\n')
 fprintf('%30s\n',use{:})
 
@@ -83,7 +95,8 @@ t=G.cats.name;
 %
 % short term plan: we specify which level 2+3 groups to use in chartconfig
 %
-chartconfig
+% chartconfig
+% now we specify groups and stages on the command line
 %G=Gopen(xls,sheet);
 S.xls=G.xls;
 S.sheet=G.sheet;
@@ -95,63 +108,122 @@ end
 
 % now pull the data from columns as configured
 %
-S.groups=in_groups;
-S.groupnames=in_stages;
+for k=1:length(groups)
+    if ~iscell(groups{k})
+        groups{k}={groups{k}};
+    end
+end
+verbose=false;
 
-for j=1:length(G.cats)
-  for i=1:length(use)
-    % reimplement from scratch: we are populating:
-    % S(i).categories(j).data
-    % S(i).categories(j).stages
-    % and the question is how we group a data row into stages
-    % 2nd row of H is "groups" 
-    % if H has 2 rows-- just create one data entry per column.
-    %    sequence of groups defined by in_groups variable in chartconfig
-    %    display name of groups defined by in_stages "" "" "" 
-    % if H has 3 rows-- well, we'll deal with that
-    fprintf('\t');
-    dat=[];stg=[];k=0;
-    S(i).category(j).name=G.cats(j).name;
-    S(i).category(j).units=G.cats(j).units;
-
+for i=1:length(use)
     % select only columns in our H1 use
+    dat=[];stg=[];
     S(i).name=use(i);
     sc_cols=find(strcmp(G.H(1,:),use(i))); % true indices
     % sc_cols gets attenuated
+    fprintf('\nScenario %s; ',use{i})
     
-    switch (size(G.H,1))
-      case 2
-        % one entry per column-- take stage names from H
-        % sequence 
-        for k=1:length(in_groups)
-            data_cols=[];
-            group=in_groups{k};
-            if iscell(group)
-                for kk=1:length(group)
-                    data_cols=[data_cols, ...
-                               intersect(sc_cols,find(strcmp(G.H(2,:), ...
-                                                             group{kk})))];
-                end
-            else
-                data_cols=intersect(sc_cols,find(strcmp(G.H(2,:),group)));
+    for k=1:length(groups)
+        mygroup=groups{k};
+        S(i).groups{k}=[mygroup{:}];
+        touse=[];
+        fprintf('stage matching ')
+        fprintf('%s ',mygroup{:})
+        fprintf('\n')
+        for kk=1:length(mygroup)
+            st=[];
+            [thisuse,remove]=match_cols(G.H(:,sc_cols),mygroup{kk});
+            if verbose
+                fprintf('Use: %d; ',sc_cols(thisuse))
+                fprintf('Remove: %d; ',sc_cols(remove))
+                fprintf('\n')
             end
-            dat{1}(k)=sum(dd(j,data_cols));
-            stg{1}{k}=in_stages{k};
-            sc_cols=setdiff(sc_cols,data_cols);
+            %keyboard
+            touse=[touse sc_cols(thisuse)];
+            for kkk=1:length(thisuse)
+                my_st=supertotals(G.H(:,sc_cols),thisuse(kkk));
+                if ~isempty(my_st)
+                    if verbose
+                        fprintf('Supertotals for %d: ',sc_cols(thisuse(kkk)))
+                        fprintf('%d; ',sc_cols(my_st))
+                        fprintf('\n')
+                    end
+                    st=unique([st my_st]);
+                end
+            end
+            sc_cols([remove st])=[];
         end
-      otherwise
+        for j=1:length(G.cats)
+            dat{j}(k)=sum(G.cats(j).data(touse));
+            stg{j}{k}=touse;
+        end
+        sc_cols=setdiff(sc_cols,touse);
+    end
+    if ~isempty(sc_cols)
+        fprintf('Omitted: ');
+        fprintf('%d; ',sc_cols);
+        fprintf('\n')
+        %keyboard
+    end
+    for j=1:length(G.cats)
+        S(i).category(j).name=G.cats(j).name;
+        S(i).category(j).units=G.cats(j).units;
+        if ~isempty(sc_cols)
+            dat{j}(end+1)=sum(G.cats(j).data(sc_cols));
+            stg{j}{end+1}=sc_cols;
+            fprintf('%30.30s - Omitted Total: %g %s\n',...
+                    G.cats(j).name,dat{j}(end),G.cats(j).units);
+            %keyboard
+        end
+        S(i).category(j).data=dat(j);
+        S(i).category(j).stages=stg(j);
+    end
+    if verbose
+        fprintf('Check it:\n')
         keyboard
     end
-    
-    %dat={[dat{:}]};
-    %stg={[stg{:}]};
-    optstr='standard column stacking';
-  
-    % assign
-    S(i).category(j).data=dat;
-    S(i).category(j).stages=stg;
-
-  end
-  fprintf('%s',optstr);
 end
-fprintf('\n\n')
+
+
+
+function [use,remove]=match_cols(H,match)
+% function [use,remove]=match_cols(H,match)
+% returns a set of indices INTO sc_cols to use and remove, respectively. 
+% H should be supplied as H(:,sc_cols)
+
+deepest=size(H,1);
+
+M=strcmp(H,match);
+toplevel=min(find(sum(M,2)));
+
+col_matches=find(M(toplevel,:));
+if toplevel<deepest
+    remove=intersect(col_matches,find(~cisnan(H(toplevel+1,:))));
+    use=setdiff(col_matches,remove);
+else
+    use=col_matches;
+    remove=[];
+end
+
+function totals=supertotals(H,col)
+% for a given column, recursively identify records that include it in a total.
+bottomlevel=max(find(~cisnan(H(:,col))));
+if bottomlevel==1
+    totals=[];
+else
+    shallower=find(cisnan(H(bottomlevel,:)));
+    for i=bottomlevel-1:-1:1
+        myparents=find(strcmp(H(i,:),H(i,col)));
+        shallower=intersect(shallower,myparents);
+    end
+    if length(shallower)>1
+        fprintf('This messy recursion is not working.\n')
+        keyboard
+    elseif length(shallower)==1
+        totals=[shallower supertotals(H,shallower)];
+    else
+        totals=[];
+    end
+end
+
+

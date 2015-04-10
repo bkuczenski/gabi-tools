@@ -5,6 +5,17 @@ function G=Gcats(G,cats)
 % 'cats' is either a vector of row indices or a cell array of indices.  In the
 % latter case, each entry in the cell array indicates rows that should be added
 % together.  Throws an error if two rows to be added have different units.
+%
+% NOTE: the index value in cats should be given from the TOP OF THE DATA BLOCK, 
+% and not the row number of the spreadsheet.  This is because the spreadsheet
+% offset is useless elsewhere, whereas the data block is used throughout the code.
+% If you are lazy and only want to read spreadsheet row numbers, you will have to 
+% adjust them with a command like:
+%
+% cats_corrected = cats - firstrow + 1 % if cats is a double array
+% cats_corrected = cellfun(@(x) x - firstrow + 1, cats) % if cats is a cell array
+%
+% where 'firstrow' is the row number of the first data row.
 % 
 % function S=Gcats(G,use,cats)
 %

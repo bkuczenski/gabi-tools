@@ -1,17 +1,21 @@
-function f=waterfallchart(wfstruct,scenname)
+function f=waterfallchart(wfstruct,scenname,cats)
 % function f=waterfallchart(wfstruct,scenname)
 %
 % draws a stack of waterfall charts by use case, from a waterfall structure
 % created from GaBi via wfread.
 
-if nargin<2
+if nargin<3
+    cats=1:length(wfstruct(1).category);
+end
+
+if nargin<2 
   scenname='';
 end
 f=[];
 chartconfig
 
 numscenarios=length(wfstruct);
-numcats=length(wfstruct(1).category);
+numcats=length(cats);
 
 if numscenarios>4
   figheight=1.7;
@@ -31,7 +35,7 @@ wfstruct=wfmin(wfstruct);
 for s=1:numscenarios
     for c=1:numcats
     
-    if isfield(wfstruct(s).category(c),'fdata')
+    if 0%isfield(wfstruct(s).category(c),'fdata')
       % use TZ encoding
       informal=strncmp(wfstruct(s).name,'20',2);
       
@@ -66,7 +70,7 @@ for s=1:numscenarios
           set(f(s),'PaperPositionMode','auto',...
                    'units','inches','Position', [5 3 figwidth 0.96]);
 
-          bkwf2(wfstruct(s).category(c),colors(c,:))
+          bkwf2(wfstruct(s).category(c),colors(c,:),wfstruct(1).groups)
           if isempty(scenname)
               title(strcat(wfstruct(s).name,[' - ' wfstruct(s).category(c).name]),'FontSize',titlefontsize);
           else

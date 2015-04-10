@@ -1,4 +1,8 @@
-function bkwf2(my_cat,mycolor,varargin)
+function bkwf2(my_cat,mycolor,stages)
+
+if nargin<3
+    stages=my_cat.stages;
+end
 
 % load configuration
 chartconfig
@@ -7,7 +11,7 @@ if ~iscell(my_cat.data)
 end
 
 numclusters=length(my_cat.data);
-numstages=length([my_cat.data{:}]);
+numstages=length(stages);
 set(gcf,'Position',get(gcf,'Position')+[0 0 0 0.145*numstages])
 maxy=labelcutoff*my_cat.maxy;
 
@@ -50,7 +54,7 @@ for k=1:numclusters
 end
 
 set(gca,'YTick',[1:numstages]);
-set(gca,'YTickLabel',[my_cat.stages{:}],'FontSize',mainfontsize);
+set(gca,'YTickLabel',stages,'FontSize',mainfontsize);
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
 
 %         attributional total vline

@@ -1,13 +1,17 @@
 
 %% this needs to be in workflow var
 %% for Patagonia
-in_groups={{'PA66','PET','Mfg'},'DC','Retail','Use','EOL'};
-in_stages={'Upstream Production','Distribution Ctr',...
-           'Retail','Consumer Use','End of Life'};
+% in_groups={{'PA66','PET','Mfg'},'DC','Retail','Use','EOL'};
+% in_stages={'Upstream Production','Distribution Ctr',...
+%            'Retail','Consumer Use','End of Life'};
 
 %% for Toray
-%in_groups={'Raw Materials','Fiber','Fabric','Sewing','Transport'}
-%in_stages=in_groups;
+% in_groups={'Raw Materials','Fiber','Fabric','Sewing','Transport'}
+% in_stages=in_groups;
+
+%% for Toray-by-material
+%in_groups = {'PA66','PET','Mfg'};
+%in_stages = {'PA66','PET','Manufacture'}
 
 figwidth=6;             % figure width in inches
 %halfwidth=3.25;

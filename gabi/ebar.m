@@ -25,8 +25,16 @@ vhash(x+hi,y,size);
 plot(x,y,'.k','markersize',12)
 
 if nargin==6 || dotext
-    text(x+min([lo hi]),y,txtin,'horizontalalignment','right','vert','middle',...
-         'FontSize',8);
+    midpoint=mean(get(gca,'xlim'));
+    if x>midpoint
+        xpoint=min([lo hi]);
+        hal='right';
+    else
+        xpoint=max([lo hi]);
+        hal='left';
+    end
+    text(x+1.2*xpoint,y,txtin,'horizontalalignment',hal,'vert','middle',...
+         'FontSize',8,'backgroundcolor',[1 1 1]);
 end
 
 function vhash(x,y,size)
