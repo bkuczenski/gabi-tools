@@ -12,7 +12,6 @@ end
 
 numclusters=length(my_cat.data);
 numstages=length(stages);
-set(gcf,'Position',get(gcf,'Position')+[0 0 0 0.145*numstages])
 maxy=labelcutoff*my_cat.maxy;
 
 buffer=0.01*(my_cat.maxcons-my_cat.min);
@@ -28,12 +27,6 @@ else
         0.5,numstages+0.9]);
 end
 hold on
-% draw x-axis label?
-if drawxaxislabel=='y'
-  xlabel(my_cat.units,'FontSize',mainfontsize);
-%else
-%  xlabel(' ','FontSize',mainfontsize);
-end
 
 % delete y axis (set by option)
 if noyaxis=='y'
@@ -45,7 +38,7 @@ end
 % plot the figure
 offs=0;
 for k=1:numclusters
-  offs=drawbars(my_cat.data{k},mycolor,buffer,fmean,maxy,offs);
+  offs=drawbars(my_cat.data{k}(1:numstages),mycolor,buffer,fmean,maxy,offs);
   if k~=numclusters & offs>0
     %  hhhh=hline(offs+0.5);
     %  set(hhhh,'color',[.5 .5 .5]);

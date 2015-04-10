@@ -17,7 +17,6 @@ if ~iscell(my_cat.data)
 end
 
 numstages=length(stages);
-set(gcf,'Position',get(gcf,'Position')+[0 0 0 0.145*numstages])
 maxy=labelcutoff*my_cat.maxy;
 
 buffer=0.01*(my_cat.maxcons-my_cat.min);
@@ -33,12 +32,6 @@ else
         0.5,numstages+1.9]);
 end
 hold on
-% draw x-axis label?
-if drawxaxislabel=='y'
-  xlabel(my_cat.units,'FontSize',mainfontsize);
-%else
-%  xlabel(' ','FontSize',mainfontsize);
-end
 
 % delete y axis (set by option)
 if noyaxis=='y'
