@@ -70,17 +70,21 @@ end
 [~,I]=sort(firstind);
 use=use(I);
 
-stages=unique(G.H(2,cellfun(@isstr,G.H(2,:))));
-
-% sort stages by the order they appear in H
-for i=1:length(stages)
-  firstind(i)=min(find(strcmp(G.H(2,cellfun(@isstr,G.H(2,:))),stages{i})));
-end
-[~,I]=sort(firstind);
-stages=stages(I);
-
-if nargin<2 | isempty(groups)
-  groups=stages;
+if size(G.H,1)==1
+    groups='';
+else
+    stages=unique(G.H(2,cellfun(@isstr,G.H(2,:))));
+    
+    % sort stages by the order they appear in H
+    for i=1:length(stages)
+        firstind(i)=min(find(strcmp(G.H(2,cellfun(@isstr,G.H(2,:))),stages{i})));
+    end
+    [~,I]=sort(firstind);
+    stages=stages(I);
+    
+    if nargin<2 | isempty(groups)
+        groups=stages;
+    end
 end
 
 
@@ -122,6 +126,16 @@ for i=1:length(use)
     sc_cols=find(strcmp(G.H(1,:),use(i))); % true indices
     % sc_cols gets attenuated
     fprintf('\nScenario %s; ',use{i})
+
+    if length(groups)==0
+        fprintf('No groups\n')
+        assert(length(sc_cols)==1,'messed up dawg')
+        for j=1:length(G.cats)
+            dat{j}(1)=G.cats(j).data(sc_cols);
+            stg{j}(k)=sc_cols;
+        end
+        sc_cols=[];
+    end
     
     for k=1:length(groups)
         mygroup=groups{k};
