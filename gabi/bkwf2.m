@@ -1,25 +1,28 @@
-function bkwf2(my_cat,mycolor,stages)
+function bkwf2(my_cat,mycolor,stages,draw_ytick)
 
+if nargin<4
+    draw_ytick=true;
+end
 if nargin<3
     stages=my_cat.stages;
 end
 
 % load configuration
-chartconfig
+global chartconfig
 if ~iscell(my_cat.data)
   error('must be cell!')
 end
 
 numclusters=length(my_cat.data);
 numstages=length(stages);
-maxy=labelcutoff*my_cat.maxy;
+maxy=chartconfig.labelcutoff*my_cat.maxy;
 
 buffer=0.01*(my_cat.maxcons-my_cat.min);
 fmean=mean([my_cat.min,mean(my_cat.maxcons)]);
 
 % set graphics options
 % pureattrib - not sure what this is for
-if pureattrib=='y'
+if chartconfig.pureattrib
   axis([my_cat.min,my_cat.maxatt,...
         0.5,numstages+0.9]);
 else
@@ -29,7 +32,7 @@ end
 hold on
 
 % delete y axis (set by option)
-if noyaxis=='y'
+if chartconfig.noyaxis
   xlims=get(gca,'xlim');
   vvvv=vline(xlims(1,1),'-');
   set(vvvv,'color',[1 1 1]);
@@ -46,13 +49,17 @@ for k=1:numclusters
   end
 end
 
-set(gca,'YTick',[1:numstages]);
-set(gca,'YTickLabel',stages,'FontSize',mainfontsize);
+set(gca,'YTick',[1:numstages],'FontSize',chartconfig.mainfontsize);
+if draw_ytick
+    set(gca,'YTickLabel',stages);
+else
+    set(gca,'YTickLabel',{});
+end
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
 
 %         attributional total vline
-if drawattribtotal=='y'
-  if pureattrib=='n'
+if chartconfig.drawattribtotal
+  if ~chartconfig.pureattrib
     for j=1:length(fdata); % includes negative impacts from onsite
       attr(j,1)=sum(fdata(1:j));
       attrmax=max(attr);
@@ -67,7 +74,7 @@ end
 
 %---------------------------------------
 function offs=drawbars(fdata,mycolor,buffer,fmean,maxy,offs)
-chartconfig
+global chartconfig
 
 if nargin<6
   offs=0;
@@ -80,14 +87,16 @@ x=offs+repmat(1:fc,2,1)';
 fspaces(1,2:fc)=cumsum(fdata(1,1:end-1));
 datagroupf=[fspaces;fdata]';
 try
-g1=barh(x,datagroupf,barwidth,'stacked','EdgeColor','none');
+g1=barh(x,datagroupf,chartconfig.barwidth,'stacked','EdgeColor','none');
 catch
   keyboard
   end
 set(g1(1),'visible','off');
 set(g1(2),'FaceColor',mycolor);
 drawconsline(fdata,fspaces,offs);
-drawbardatalabels(fdata,fspaces,fmean,buffer,maxy,offs);
+if chartconfig.barlabels
+    drawbardatalabels(fdata,fspaces,fmean,buffer,maxy,offs);
+end
 
 baseline_handle = get(g1(2),'BaseLine');
 set(baseline_handle,'Color',[0.5 0.5 0.5],'XData',[0 0],'YData',get(gca,'ylim'));
@@ -99,7 +108,7 @@ hold on
 
 %---------------------------------------
 function drawbardatalabels(fdata,fspaces,fmean,buffer,maxy,offs)
-chartconfig
+global chartconfig
 
 if nargin<6
   offs=0;
@@ -109,31 +118,31 @@ for i=1:fc
   if abs(fdata(1,i))>maxy
     text((fspaces(1,i-0)+fdata(1,i)/2),i+offs,...
          num2str(fdata(1,i),'%10.3G'),...
-         'horiz','center','vert','middle','FontSize',mainfontsize)
+         'horiz','center','vert','middle','FontSize',chartconfig.mainfontsize)
   else 
     if (fdata(1,i)+fspaces(1,i))<fmean
       if fdata(1,i)>0
         text((fspaces(1,i)+fdata(1,i)+buffer),i+offs,...
              num2str(fdata(1,i),'%10.3G'),...
              'horizontalalignment','left','vert','middle',...
-             'FontSize',mainfontsize)
+             'FontSize',chartconfig.mainfontsize)
       else
         text(fspaces(1,i)+buffer,i+offs,...
              num2str(fdata(1,i),'%10.3G'),...
              'horizontalalignment','left','vert','middle',...
-             'FontSize',mainfontsize)
+             'FontSize',chartconfig.mainfontsize)
       end
     else
       if fdata(1,i)<0
         text((fspaces(1,i)+fdata(1,i)-buffer),i+offs,...
              num2str(fdata(1,i),'%10.3G'),...
              'horizontalalignment','right','vert','middle',...
-            'FontSize',mainfontsize)
+            'FontSize',chartconfig.mainfontsize)
       else
         text(fspaces(1,i)-buffer,i+offs,...
              num2str(fdata(1,i),'%10.3G'),...
              'horizontalalignment','right','vert','middle',...
-             'FontSize',mainfontsize)
+             'FontSize',chartconfig.mainfontsize)
       end
     end
   end
@@ -141,14 +150,14 @@ end
   
 %---------------------------------------
 function drawconsline(fdata,fspaces,offs)
-chartconfig
+global chartconfig
 
-k=barwidth/2;
+k=chartconfig.barwidth/2;
 fc=length(fdata);
 if nargin<3
   offs=0;
 end
-if drawconstotal=='y'; 
+if chartconfig.drawconstotal
   for i=2:fc+1;
     if i==fc+1
       line('XData', (fspaces(1,i-1)+fdata(1,i-1))*[1 1],...

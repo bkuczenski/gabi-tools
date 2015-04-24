@@ -10,6 +10,9 @@ function f=waterfallchart(wfstruct,scenname,cats,subfig)
 % f=waterfallchart(wfstruct,scenname,cats,subfig)
 % arrange all plots for a given category on subplots instead of separate figures. 
 % subfig should be a 1x2 array containing the first two arguments to subplot().
+%
+% if prod(subfig) == length(wfstruct) * length(cats), draws a "big grid" with
+% categories by column, scenarios by row, omitting y axis labels for inner plots.
 
 if nargin<4
     subfig=[];
@@ -30,17 +33,26 @@ else
 end
     
 f=[];
-chartconfig
+global chartconfig
 
 numscenarios=length(wfstruct);
 numcats=length(cats);
+
+biggrid=false;
+
+if ~isempty(subfig)
+    if prod(subfig)==numscenarios*numcats
+        biggrid=true;
+    end
+end
+
 
 if numscenarios>4
   figheight=1.7;
 end
 %numstages=length([fcols,impcols,onscols]);
 
-if numcats>size(colors,1)
+if max(cats)>size(chartconfig.colors,1)
   fprintf('Not enough colors..\n')
   keyboard
 end
@@ -55,15 +67,16 @@ min_size=0.96;
         
 numstages=length(wfstruct(1).groups);
 ax_height=min_size + 0.145*numstages;
+draw_ytick=true;
 
 for c=1:numcats
 
-    if ~isempty(subfig)
+    if ~isempty(subfig) && ( biggrid==false || c==1)
         f(c)=figure;
         
         set(f(c),'PaperPositionMode','auto',...
                    'units','inches','Position', ...
-                 [5, 3, figwidth*subfig(2), ax_height*subfig(1) ]);
+                 [5, 3, chartconfig.figwidth*subfig(2), ax_height*subfig(1) ]);
 
     end
         
@@ -74,41 +87,54 @@ for c=1:numcats
       % names in cell arrays.  cell arrays required!
       %fprintf('you fool!\n')
 
-      if norm([wfstruct(s).category(c).data{:}])~=0
+      my_cat=wfstruct(s).category(cats(c));
+      
+      if norm([my_cat.data{:}])~=0
       
           if isempty(subfig)
               f(c,s)=figure;
               set(f(c,s),'PaperPositionMode','auto',...
                          'units','inches','Position', ...
-                         [5, 3, figwidth, ax_height ]);
+                         [5, 3, chartconfig.figwidth, ax_height ]);
           else
-              subplot(subfig(1),subfig(2),s)
+              if biggrid
+                  subplot(subfig(1),subfig(2), ...
+                          numcats*(s-1)+c)
+                  if c>1
+                      draw_ytick=false;
+                  end
+
+              else
+                  subplot(subfig(1),subfig(2),s)
+              end
           end
           
-          bkwf2(wfstruct(s).category(c),colors(c,:),wfstruct(1).groups)
+          bkwf2(my_cat,chartconfig.colors(cats(c),:),wfstruct(1).groups,draw_ytick)
 
           if isempty(subfig)
           
               % draw x-axis label?
-              if drawxaxislabel=='y'
-                  xlabel(my_cat.units,'FontSize',mainfontsize);
+              if chartconfig.drawxaxislabel
+                  xlabel(my_cat.units,'FontSize',chartconfig.mainfontsize);
                   %else
-                  %  xlabel(' ','FontSize',mainfontsize);
+                  %  xlabel(' ','FontSize',chartconfig.mainfontsize);
               end
               
-              title({wfstruct(s).category(c).name,[wfstruct(s).name{1} title_append]},'FontSize',titlefontsize);
+              title({my_cat.name,[wfstruct(s).name{1} title_append]},'FontSize',...
+                    chartconfig.titlefontsize);
           else
               if s==1
-                  title({wfstruct(s).category(c).name,[wfstruct(s).name{1} title_append]},'FontSize',titlefontsize);
+                  title({my_cat.name,[wfstruct(s).name{1} title_append]},'FontSize',...
+                        chartconfig.titlefontsize);
               else
                   title([wfstruct(s).name{1} title_append],'FontSize', ...
-                      titlefontsize);
+                      chartconfig.titlefontsize);
               end
               if s==numscenarios
-                  if drawxaxislabel=='y'
-                      xlabel(wfstruct(s).category(c).units,'FontSize',mainfontsize);
+                  if chartconfig.drawxaxislabel
+                      xlabel(my_cat.units,'FontSize',chartconfig.mainfontsize);
                       %else
-                      %  xlabel(' ','FontSize',mainfontsize);
+                      %  xlabel(' ','FontSize',chartconfig.mainfontsize);
                   end
               end
           end

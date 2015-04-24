@@ -13,14 +13,16 @@
 %in_groups = {'PA66','PET','Mfg'};
 %in_stages = {'PA66','PET','Manufacture'}
 
-figwidth=6;             % figure width in inches
+global chartconfig
+
+chartconfig.figwidth=6;             % figure width in inches
 %halfwidth=3.25;
 
-titlefontsize=10;       
-mainfontsize=8;
+chartconfig.titlefontsize=10;       
+chartconfig.mainfontsize=8;
 
 % colors
-colors=[...
+chartconfig.colors=[...
     175,228,235;
     201,245,143;
     232,194,230;
@@ -34,11 +36,13 @@ colors=[...
 
 %% plot parameters
  
-barwidth=0.65;          % bar width=1 leaves no gap between bars
-labelcutoff=0.14;       % minimum percent of groupcategory maximum value to center bar label
-drawattribtotal='n';    % set to 'y' to draw dashed attributional total markers
-pureattrib='n';         % set to 'y' to only count positive impacts in attributional total
-drawconstotal='y';      % set to 'y' to draw fat consequential total markers
-drawxaxislabel='y';     % make a units label for x axis?
-noyaxis='n';            % remove y axis line?
+
+chartconfig.barwidth=0.65;          % bar width=1 leaves no gap between bars
+chartconfig.labelcutoff=0.14;       % minimum percent of groupcategory maximum value to center bar label
+chartconfig.drawattribtotal=false;  % set to true to draw dashed attributional total markers
+chartconfig.pureattrib=false;       % set to 'y' to only count positive impacts in attributional total
+chartconfig.drawconstotal=true;     % set to 'y' to draw fat consequential total markers
+chartconfig.drawxaxislabel=true;    % make a units label for x axis?
+chartconfig.noyaxis=false;          % remove y axis line?
+chartconfig.barlabels=true;
 

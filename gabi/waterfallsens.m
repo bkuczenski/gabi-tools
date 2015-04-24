@@ -12,7 +12,7 @@ function f=waterfallsens(wfstruct,varargin)
 % Arrange all plots on subplots instead of separate figures.  subfig should be a
 % 1x2 array containing the first two arguments to subplot().
 
-chartconfig
+global chartconfig
 
 subfig=[];
 
@@ -60,7 +60,7 @@ if ~isempty(subfig)
     f=figure;
     set(f,'PaperPositionMode','auto',...
           'units','inches','Position', ...
-          [5 3 figwidth*subfig(2) ax_height*subfig(1)]);
+          [5 3 chartconfig.figwidth*subfig(2) ax_height*subfig(1)]);
 end
     
 
@@ -72,12 +72,16 @@ for c=1:length(cats)
             f(c)=figure;
             
             set(f(c),'PaperPositionMode','auto',...
-                     'units','inches','Position', [5 3 figwidth ax_height]);
+                     'units','inches','Position', [5 3 chartconfig.figwidth ax_height]);
         else
             subplot(subfig(1),subfig(2),c);
         end
-        bkwfsens(wfstruct,cat,colors(cat,:),wfstruct(1).groups)
-
+        if isfield(wfstruct(1),'TotalSens')
+        bkwfsens(wfstruct,cat,chartconfig.colors(cat,:),wfstruct(1).groups,wfstruct(1).TotalSens)
+        else
+        bkwfsens(wfstruct,cat,chartconfig.colors(cat,:),wfstruct(1).groups)
+        end
+        
         fprintf('%30.30s: \t%10.3g\t%10.3g\t%10.3g\n',...
                 wfstruct(1).category(cat).name,...
                 sum([wfstruct(1).category(cat).data{:}]),...
@@ -86,31 +90,32 @@ for c=1:length(cats)
                 sum([wfstruct(3).category(cat).data{:}]- ...
                     [wfstruct(1).category(cat).data{:}]));
 
-        if isempty(subfig)
-            titlestr=sprintf('%s%s - %s','Sensitivity',scenname,wfstruct(1).category(cats(c)).name);
-            title(titlestr,'FontSize',titlefontsize);
-            % draw x-axis label?
-            if drawxaxislabel=='y'
-                xlabel(wfstruct(1).category(cats(c)).units,'FontSize',mainfontsize);
+        % titlestr=sprintf('%s%s - %s','Sensitivity',scenname,wfstruct(1).category(cats(c)).name);
+        titlestr=wfstruct(1).category(cats(c)).name;
+        title(titlestr,'FontSize',chartconfig.titlefontsize);
+        % draw x-axis label?
+        % if isempty(subfig)
+            if chartconfig.drawxaxislabel
+                xlabel(wfstruct(1).category(cats(c)).units,'FontSize',chartconfig.mainfontsize);
                 %else
-                %  xlabel(' ','FontSize',mainfontsize);
+                %  xlabel(' ','FontSize',chartconfig.mainfontsize);
             end
-        else
-            if c==1
-                titlestr={[wfstruct(1).category(cats(c)).name ' - Sensitivity'],...
-                          scenname};
-            else
-                titlestr=scenname;
-            end
-            title(titlestr,'FontSize',titlefontsize);
-            if c==length(cats)
-                % draw x-axis label?
-                if drawxaxislabel=='y'
-                    xlabel(wfstruct(1).category(cats(c)).units,'FontSize',mainfontsize);
-                    %else
-                    %  xlabel(' ','FontSize',mainfontsize);
-                end
-            end
+        % else
+        %     if c==1
+        %         titlestr={[wfstruct(1).category(cats(c)).name ' - Sensitivity'],...
+        %                   scenname};
+        %     else
+        %         titlestr=scenname;
+        %     end
+        %     title(titlestr,'FontSize',titlefontsize);
+        %     if c==length(cats)
+        %         % draw x-axis label?
+        %         if chartconfig.drawxaxislabel=='y'
+        %             xlabel(wfstruct(1).category(cats(c)).units,'FontSize',chartconfig.mainfontsize);
+        %             %else
+        %             %  xlabel(' ','FontSize',chartconfig.mainfontsize);
+        %         end
+        %     end
         end
     end
 end
