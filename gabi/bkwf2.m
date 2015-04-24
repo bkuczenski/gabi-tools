@@ -56,6 +56,7 @@ else
     set(gca,'YTickLabel',{});
 end
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
+smartxlabel(gca)
 
 %         attributional total vline
 if chartconfig.drawattribtotal
@@ -83,17 +84,24 @@ fc=length(fdata);
 if fc==0
   return
 end
-x=offs+repmat(1:fc,2,1)';
-fspaces(1,2:fc)=cumsum(fdata(1,1:end-1));
-datagroupf=[fspaces;fdata]';
-try
-g1=barh(x,datagroupf,chartconfig.barwidth,'stacked','EdgeColor','none');
-catch
-  keyboard
-  end
-set(g1(1),'visible','off');
+if fc==1
+    fspaces=0;
+    x=offs+1;
+    g1=barh(x,fdata,chartconfig.barwidth,'EdgeColor','none');
+    g1=[0 g1];
+else
+    fspaces(1,2:fc)=cumsum(fdata(1,1:end-1));
+    datagroupf=[fspaces;fdata]';
+    x=offs+repmat(1:fc,2,1)';
+    try
+        g1=barh(x,datagroupf,chartconfig.barwidth,'stacked','EdgeColor','none');
+    catch
+        keyboard
+    end
+    set(g1(1),'visible','off');
+    drawconsline(fdata,fspaces,offs);
+end    
 set(g1(2),'FaceColor',mycolor);
-drawconsline(fdata,fspaces,offs);
 if chartconfig.barlabels
     drawbardatalabels(fdata,fspaces,fmean,buffer,maxy,offs);
 end

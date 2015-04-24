@@ -51,6 +51,7 @@ offs=drawbars(my_cat.data{1}(1:numstages),mycolor,buffer,fmean,maxy,offs,errorba
 set(gca,'YTick',[1:numstages+1]);
 set(gca,'YTickLabel',[stages TotalSens],'FontSize',chartconfig.mainfontsize);
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
+smartxlabel(gca)
 
 %         attributional total vline
 if chartconfig.drawattribtotal
