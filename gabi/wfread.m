@@ -74,6 +74,7 @@ if size(G.H,1)==1
     groups='';
 else
     stages=unique(G.H(2,cellfun(@isstr,G.H(2,:))));
+    firstind=[];
     
     % sort stages by the order they appear in H
     for i=1:length(stages)
