@@ -56,7 +56,6 @@ else
     set(gca,'YTickLabel',{});
 end
 set(gca,'YDir','reverse','box','off','TickDir','out','TickLength',[.005,.005]);
-smartxlabel(gca)
 
 %         attributional total vline
 if chartconfig.drawattribtotal
@@ -72,6 +71,8 @@ if chartconfig.drawattribtotal
   set(vvv,'color',[44 139 202]/255);
 end
 
+% set x label to scientific notation
+smartxlabel(gca)
 
 %---------------------------------------
 function offs=drawbars(fdata,mycolor,buffer,fmean,maxy,offs)

@@ -35,4 +35,4 @@ else
     end
   end
 end
-set(ax,'xticklabel',xtickl)
+set(ax,'xtick',xt,'xticklabel',xtickl)
