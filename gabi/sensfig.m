@@ -40,8 +40,8 @@ for c=1:numcats
     headers=[];
     
     for i=1:numbars
-        [dat(i,:),flag]=gen_dat_from_wf(wfstruct{i},cats(c));
-        if flag==true
+        [dat(i,:),header_flag]=gen_dat_from_wf(wfstruct{i},cats(c));
+        if header_flag==true
             headers=[headers i];
         end
     end
@@ -130,8 +130,8 @@ y=y(:)'-0.5*width;
 
 line([x;x],[y;y+width],'color',colors);
 
-function [dat,flag]=gen_dat_from_wf(wfstruct,c)
-flag=false;
+function [dat,header_flag]=gen_dat_from_wf(wfstruct,c)
+header_flag=false;
 if isempty(wfstruct)
     dat=[0,0,0];
     return
@@ -142,7 +142,7 @@ sa=2;
 sb=length(wfstruct);
 if sb<3 sa=1; end
 
-if sb==1 flag=true; end
+if sb==1 header_flag=true; end
 
 dat = [sum(wfstruct(sa).category(c).data{:}),...
        sum(wfstruct(base).category(c).data{:}),...
