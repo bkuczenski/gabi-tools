@@ -57,7 +57,7 @@ wfstruct=wfmin(wfstruct);
 min_size=0.96;
         
 numstages=length(wfstruct(1).groups);
-ax_height=min_size + 0.145*numstages;
+ax_height=min_size + 0.185*numstages;
 
 for s=1:numscenarios
 
