@@ -46,3 +46,4 @@ chartconfig.drawxaxislabel=true;    % make a units label for x axis?
 chartconfig.noyaxis=false;          % remove y axis line?
 chartconfig.barlabels=true;
 
+chartconfig.print_to_file=false;    % added for print -depsc
