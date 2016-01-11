@@ -100,12 +100,14 @@ for c=1:numcats
       % data row
       sensline([min(dat(i,:)) max(dat(i,:))],y_pos(i),chartconfig.barwidth,...
            chartconfig.colors(cats(c),:));
-      % draw points for visibility
-      if dat(i,1)~=dat(i,2)
-        plot(dat(i,1),y_pos(i),marker{1})
-      end
-      if dat(i,3)~=dat(i,2)
-        plot(dat(i,3),y_pos(i),marker{2})
+      if chartconfig.draw_markers
+        % draw points for visibility
+        if dat(i,1)~=dat(i,2)
+          plot(dat(i,1),y_pos(i),marker{1})
+        end
+        if dat(i,3)~=dat(i,2)
+          plot(dat(i,3),y_pos(i),marker{2})
+        end
       end
       text(x_lim(1),y_pos(i),[cases{i} '  '],'fontsize',chartconfig.mainfontsize,...
            'horizontalalign','right','verticalalign','cap');

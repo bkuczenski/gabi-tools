@@ -47,3 +47,5 @@ chartconfig.noyaxis=false;          % remove y axis line?
 chartconfig.barlabels=true;
 
 chartconfig.print_to_file=false;    % added for print -depsc
+
+chartconfig.draw_markers=false;
