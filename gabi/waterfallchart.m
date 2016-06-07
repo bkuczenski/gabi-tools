@@ -79,7 +79,12 @@ for c=1:numcats
                  [5, 3, chartconfig.figwidth*subfig(2), ax_height*subfig(1) ]);
 
     end
-        
+
+    fprintf('\n%s\n', wfstruct(1).category(cats(c)).name)
+    fprintf('%30.30s','')
+    fprintf(' %19s', wfstruct(1).groups{:})
+    fprintf('\n%s\n',repmat('=',1,30+20*length(wfstruct(1).groups)))
+    
     for s=1:numscenarios
     
       % use BK encoding
@@ -111,6 +116,10 @@ for c=1:numcats
           
           bkwf2(my_cat,chartconfig.colors(cats(c),:),wfstruct(1).groups,draw_ytick)
 
+          fprintf('%30.30s',wfstruct(s).name{1})
+          fprintf('        %12g', my_cat.data{1}(1:length(wfstruct(1).groups)))
+          fprintf('\n')
+          
           if isempty(subfig)
           
               % draw x-axis label?
