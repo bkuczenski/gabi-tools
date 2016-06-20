@@ -20,6 +20,7 @@ chartconfig.figwidth=6;             % figure width in inches
 
 chartconfig.titlefontsize=10;       
 chartconfig.mainfontsize=8;
+chartconfig.labelfontsize=6.5;
 
 % colors
 chartconfig.colors=[...
